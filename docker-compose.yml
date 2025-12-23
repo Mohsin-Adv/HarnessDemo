@@ -1,0 +1,12 @@
+services:
+  harnessdemo:
+    image: ${DOCKER_REGISTRY-}harnessdemo
+    build:
+      context: .
+      dockerfile: HarnessDemo/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
