@@ -58,7 +58,7 @@ jobs:
           path: image-metadata.json
 
       - name: Trigger Harness deployment
-        if: ${{ secrets.HARNESS_TRIGGER_URL && secrets.HARNESS_API_KEY }}
+        if: ${{ secrets.HARNESS_TRIGGER_URL != '' && secrets.HARNESS_API_KEY != '' }}
         env:
           HARNESS_TRIGGER_URL: ${{ secrets.HARNESS_TRIGGER_URL }}
           HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}
