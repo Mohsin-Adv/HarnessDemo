@@ -65,7 +65,7 @@ jobs:
 
       # Optional: Trigger Harness Pipeline via Webhook Trigger
       - name: Trigger Harness deployment
-        if: ${{ secrets.HARNESS_TRIGGER_URL != '' && secrets.HARNESS_API_KEY != '' }}
+        # if: ${{ secrets.HARNESS_TRIGGER_URL != '' && secrets.HARNESS_API_KEY != '' }} //blocking the workflow
         env:
           HARNESS_TRIGGER_URL: ${{ secrets.HARNESS_TRIGGER_URL }}
           HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}
