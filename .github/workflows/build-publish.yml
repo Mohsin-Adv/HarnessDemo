@@ -10,8 +10,11 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  AWS_ACCOUNT_ID: 069705096352
+  AWS_ROLE_ARN: arn:aws:iam::069705096352:role/harness-demo-github-action-role
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: harness-demo-github-actions
+  IMAGE_TAG: latest
 
 jobs:
   build-publish-trigger:
@@ -20,18 +23,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Configure AWS (OIDC recommended)
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      # If you prefer access keys, use this instead:
-      # - uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -49,12 +45,10 @@ jobs:
           docker build -f HarnessDemo/Dockerfile -t "$IMAGE_URI" .
           docker push "$IMAGE_URI"
 
-          # push 'latest' for convenience (optional)
           LATEST_URI="${REGISTRY}/${ECR_REPOSITORY}:latest"
           docker tag "$IMAGE_URI" "$LATEST_URI"
           docker push "$LATEST_URI"
 
-          # Persist metadata for downstream systems
           echo "{\"imageUri\":\"$IMAGE_URI\",\"tag\":\"$IMAGE_TAG\"}" > image-metadata.json
 
       - name: Upload image metadata artifact
@@ -63,15 +57,14 @@ jobs:
           name: image-metadata
           path: image-metadata.json
 
-      # Optional: Trigger Harness Pipeline via Webhook Trigger
       - name: Trigger Harness deployment
-        # if: ${{ secrets.HARNESS_TRIGGER_URL != '' && secrets.HARNESS_API_KEY != '' }} //blocking the workflow
+        if: ${{ secrets.HARNESS_TRIGGER_URL && secrets.HARNESS_API_KEY }}
         env:
           HARNESS_TRIGGER_URL: ${{ secrets.HARNESS_TRIGGER_URL }}
           HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}
-          IMAGE_URI: ${{ env.IMAGE_URI }}
         run: |
-          # Payload fields can be mapped in the Harness Trigger
+          echo "Triggering Harness with IMAGE_URI=${IMAGE_URI}"
+
           curl -sS -X POST \
             -H "x-api-key: ${HARNESS_API_KEY}" \
             -H "content-type: application/json" \
