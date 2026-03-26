@@ -75,17 +75,3 @@ jobs:
         with:
           name: published-app
           path: ./publish
-
-      # Optional: Trigger Harness Pipeline via Webhook Trigger
-      - name: Trigger Harness deployment
-        if: ${{ success() && secrets.HARNESS_TRIGGER_URL != '' && secrets.HARNESS_API_KEY != '' }}
-        env:
-          HARNESS_TRIGGER_URL: ${{ secrets.HARNESS_TRIGGER_URL }}
-          HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}
-          S3_PATH: ${{ env.S3_PATH }}
-        run: |
-          curl -sS -X POST \
-            -H "x-api-key: ${HARNESS_API_KEY}" \
-            -H "content-type: application/json" \
-            -d "{\"S3_PATH\":\"${S3_PATH}\",\"COMMIT\":\"${{ github.sha }}\"}" \
-            "${HARNESS_TRIGGER_URL}"
