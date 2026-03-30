@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: ${{ vars.AWSREGION }}
-  S3_BUCKET: ${{ vars.S3BUCKET }}
+  AWS_REGION: eu-west-2
+  S3_BUCKET: harnessdemobucket
   DOTNET_VERSION: '9.0.x'
 
 jobs:
@@ -26,6 +26,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # Debug: Check environment variables
+      - name: Debug environment variables
+        run: |
+          echo "AWS_REGION: ${{ env.AWS_REGION }}"
+          echo "S3_BUCKET: ${{ env.S3_BUCKET }}"
+          echo "Region is set: ${{ env.AWS_REGION != '' }}"
+          echo "Secrets available: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}"
+
       # Configure AWS credentials using Access Keys (with session token for temporary credentials)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -33,7 +41,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: eu-west-2
 
       # Restore dependencies
       - name: Restore dependencies
