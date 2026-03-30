@@ -16,6 +16,7 @@ env:
 jobs:
   build-publish-s3:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
